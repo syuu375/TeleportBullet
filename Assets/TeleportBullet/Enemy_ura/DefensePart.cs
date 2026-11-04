@@ -50,7 +50,7 @@ public class DefensePart : MonoBehaviour, IDamage
         damageSourceLayers = LayerMask.GetMask("PlayerBullet", "EnemyBullet");
     }
 
-    // 相手（弾など）のレイヤーが、ダメージを受けてよいレイヤーかを判定する
+    //相手（弾など）のレイヤーが、ダメージを受けてよいレイヤーかを判定する
     public bool CanBeDamagedBy(GameObject source)
     {
         return (damageSourceLayers.value & (1 << source.layer)) != 0;
@@ -109,12 +109,12 @@ public class DefensePart : MonoBehaviour, IDamage
     }
 
     //HPを全回復して部位を復活させる（リスポーンや再戦用）
-    //public void ResetPart()
-    //{
-    //    IsBroken = false;
-    //    CurrentHp = maxHp;
-    //    SetActiveParts(true);
-    //}
+    public void ResetPart()
+    {
+        IsBroken = false;
+        CurrentHp = maxHp;
+        SetActiveParts(true);
+    }
 
     private void SetActiveParts(bool active)
     {

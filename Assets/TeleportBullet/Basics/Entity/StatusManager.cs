@@ -13,7 +13,7 @@ public class StatusManager : MonoBehaviour,IDamage
         currentHp = maxHp;
     }
 
-    // IDamage （部位倍率などを考慮）
+    //IDamage 
     public virtual void TakeDamage(float damage, float multiplier)
     {
         if (IsDead) return;
@@ -30,13 +30,13 @@ public class StatusManager : MonoBehaviour,IDamage
         }
     }
 
-    // 死亡処理（子クラスでオーバーライドして個別の演出を追加）
+    //死亡処理
     protected virtual void Die()
     {
         if (IsDead) return;
         IsDead = true;
 
         Debug.Log($"{gameObject.name} が死亡しました。");
-        // TODO: 死亡時の処理（プールへの返却）
+        
     }
 }

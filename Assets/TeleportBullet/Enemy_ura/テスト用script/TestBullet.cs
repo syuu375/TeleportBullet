@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// テスト用の弾（Pushしない）。
 /// DefensePart に当たったら TakeHit を呼び、レイヤー判定の結果をConsoleに出す。
+/// それ以外の IDamage（コアのテスト用など）に当たったら TakeDamage を呼ぶ。
 /// </summary>
 public class TestBullet : MonoBehaviour
 {
@@ -23,13 +24,23 @@ public class TestBullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.TryGetComponent<DefensePart>(out var part)) return;
-
-        bool accepted = part.TakeHit(gameObject, damage, multiplier);
         string layerName = LayerMask.LayerToName(gameObject.layer);
-        string result = accepted ? "ダメージを受けた" : "無視された";
 
-        Debug.Log($"[{layerName}] の弾 → {part.name}：{result}（HP {part.CurrentHp}/{part.MaxHp}）");
-        Destroy(gameObject);
+        if (other.TryGetComponent<DefensePart>(out var part))
+        {
+            bool accepted = part.TakeHit(gameObject, damage, multiplier);
+            string result = accepted ? "ダメージを受けた" : "無視された";
+
+            Debug.Log($"[{layerName}] の弾 → {part.name}：{result}（HP {part.CurrentHp}/{part.MaxHp}）");
+            Destroy(gameObject);
+            return;
+        }
+
+        if (other.TryGetComponent<IDamage>(out var target))
+        {
+            Debug.Log($"[{layerName}] の弾 → {other.name} に命中");
+            target.TakeDamage(damage, multiplier);
+            Destroy(gameObject);
+        }
     }
 }

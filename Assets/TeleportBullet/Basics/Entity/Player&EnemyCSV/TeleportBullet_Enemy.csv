@@ -1,0 +1,4 @@
+Enemy,MainHP,ArmorHP,STR,DEF,AGI,CRI,CRIDamage,Score
+1,100,100,100,100,100,10,1.2,100
+2,,,,,,,,
+3,,,,,,,,

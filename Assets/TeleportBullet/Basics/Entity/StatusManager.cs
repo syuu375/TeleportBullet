@@ -3,7 +3,13 @@ using UnityEngine;
 public class StatusManager : MonoBehaviour,IDamage
 {
     [Header("ステータス設定")]
-    [SerializeField] protected float maxHp = 100f;
+     protected float maxHp;
+     public int Strength;
+     public int Defense;
+     public int Agility;
+     public int Critical;
+     public float CriticalDamage;
+
     protected float currentHp;
 
     public bool IsDead { get; protected set; } = false;

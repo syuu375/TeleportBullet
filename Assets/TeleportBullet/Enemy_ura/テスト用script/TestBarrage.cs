@@ -1,10 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// テスト用の弾幕（Pushしない）。
-/// 扇状に弾を撃ち、弾ごとにレイヤーを順番に割り当てて、
-/// DefensePart のレイヤー判定を確認する。
-/// </summary>
+//テスト用の弾幕
+//扇状に弾を放つ
 public class TestBarrage : MonoBehaviour
 {
     [Header("狙う相手")]
@@ -15,6 +12,8 @@ public class TestBarrage : MonoBehaviour
     [SerializeField] private int bulletsPerShot = 6;
     [SerializeField] private float spreadAngle = 40f;
     [SerializeField] private float bulletSpeed = 8f;
+    [Tooltip("弾が発射位置からこの距離だけ進んだら消える")]
+    [SerializeField] private float bulletMaxDistance = 15f;
     [SerializeField] private float damage = 10f;
 
     [Header("弾に割り当てるレイヤー（順番に使う）")]
@@ -63,8 +62,6 @@ public class TestBarrage : MonoBehaviour
         go.transform.position = transform.position;
         go.transform.rotation = Quaternion.LookRotation(dir);
         go.transform.localScale = Vector3.one * 0.3f;
-
-        // トリガーのColliderと、キネマティックなRigidbodyで OnTriggerEnter を発生させる
         go.GetComponent<Collider>().isTrigger = true;
         go.AddComponent<Rigidbody>().isKinematic = true;
 
@@ -73,6 +70,7 @@ public class TestBarrage : MonoBehaviour
 
         var bullet = go.AddComponent<TestBullet>();
         bullet.speed = bulletSpeed;
+        bullet.maxDistance = bulletMaxDistance;
         bullet.damage = damage;
     }
 }

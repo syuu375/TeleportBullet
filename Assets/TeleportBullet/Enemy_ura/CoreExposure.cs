@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+//コア(弱点)の状態管理
+//防御部分(DefensePart)に応じて、攻撃判定を有効化
 public class CoreExposure : MonoBehaviour
 {
     [Header("コア露出条件")]
@@ -15,7 +17,7 @@ public class CoreExposure : MonoBehaviour
 
     public bool IsExposed { get; private set; }
 
-    //コアが露出した時一回だけ呼ばれる
+    //コア露出時に一回だけ呼ばれる
     public event Action Exposed;
 
     private void Awake()
@@ -34,6 +36,7 @@ public class CoreExposure : MonoBehaviour
         Refresh();
     }
 
+    //部位が壊れた状態の時、露出を決めなおす(主に再戦時)
     private void OnDestroy()
     {
         if (requiredParts == null) return;

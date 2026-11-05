@@ -11,12 +11,13 @@ public class CameraController : MonoBehaviour
     [Header("Setting")]
     //[SerializeField] private Vector3 m_cameraOffset;
     [SerializeField] private Vector3 m_targetOffset;
-    [SerializeField] private Vector2 m_playersPositionOnTheScreen;
+    [SerializeField] private Vector2 m_targetPositionOnTheScreen;
+    [SerializeField] private float m_sensitivity;
 
-    [Header("Rotation")]
-    [SerializeField] private float m_lookPlayDistance;
-    [SerializeField] private float m_followSpeed;
-    [SerializeField] private float m_rotationSpeed;
+    //[Header("Rotation")]
+    //[SerializeField] private float m_lookPlayDistance;
+    //[SerializeField] private float m_followSpeed;
+    //[SerializeField] private float m_rotationSpeed;
     //[SerializeField] private float m_turningAcceleration;
 
     [Header("Movement")]
@@ -30,10 +31,14 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector3 m_cameraBaseLocalPosition;   // Camera position before shifting.
     [SerializeField] private Vector3 m_behindOfTargetXZ;    // Behind of target position, exclude y-coordinate.
     [SerializeField] private Vector2 m_currentMousePosition;
-    private Vector2 m_pastMousePosition;
-    //[SerializeField] private float m_acceleration;
-    //[SerializeField] private float m_velocityConvergence;
-    //[SerializeField] private float m_turningVelocityConvergence;
+    [SerializeField] private Vector2 m_pastMousePosition;
+    [SerializeField] private Vector2 m_moveDistance;
+    [SerializeField] private float m_fAngleX;
+    [SerializeField] private float m_fAngleY;
+
+    [Header("Rotation")]
+    [SerializeField] private Vector3 m_initialPosition;
+    [SerializeField] private Quaternion m_initialRotation;
 
     // Cache
     private Vector3 m_cameraPosition;
@@ -55,7 +60,6 @@ public class CameraController : MonoBehaviour
 
         //m_transform.position = m_target.position + cameraPosition;
         UpdateCache();
-        //UpdateLookPosition();
         UpdateCameraPosition();
 
         RotationCamera();
@@ -78,22 +82,13 @@ public class CameraController : MonoBehaviour
         UpdateBaseLocalPosition();
         m_currentMousePosition = m_mouseCurrent.position.ReadValue();
         m_pastMousePosition = m_currentMousePosition;
+        m_fAngleX = 0;
+        m_fAngleY = 0;
         
+        m_initialPosition = transform.position;
+        m_initialRotation = Quaternion.identity;
     }
 
-    private void UpdateLookPosition()
-    {
-        Vector3 vector = m_targetPosition - m_cameraPosition - m_lookPosition;
-        float distance = vector.magnitude;
-
-        if (distance > m_lookPlayDistance)
-        {
-            float moveDistance = (distance - m_lookPlayDistance) * (Time.deltaTime * m_followSpeed);
-            m_lookPosition += vector.normalized * moveDistance;
-        }
-
-        //m_transform.rotation = Quaternion.LookRotation(m_direction);
-    }
 
     private void UpdateCameraPosition()
     {
@@ -101,17 +96,17 @@ public class CameraController : MonoBehaviour
         horizontalVector.y = 0;
         float distance = horizontalVector.magnitude;
 
-        float moveDistance = 0;
-        if (distance > m_cameraDistance + m_cameraPlayDistance)
-        {
-            moveDistance = distance - (m_cameraDistance + m_cameraPlayDistance);
-            moveDistance *= Time.deltaTime * m_followSpeed;
-        }
-        else if (distance < m_cameraDistance + m_cameraPlayDistance)
-        {
-            moveDistance = distance - (m_cameraDistance - m_cameraPlayDistance);
-            moveDistance *= Time.deltaTime * m_leaveSpeed;
-        }
+        //float moveDistance = 0;
+        //if (distance > m_cameraDistance + m_cameraPlayDistance)
+        //{
+        //    moveDistance = distance - (m_cameraDistance + m_cameraPlayDistance);
+        //    moveDistance *= Time.deltaTime * m_followSpeed;
+        //}
+        //else if (distance < m_cameraDistance + m_cameraPlayDistance)
+        //{
+        //    moveDistance = distance - (m_cameraDistance - m_cameraPlayDistance);
+        //    moveDistance *= Time.deltaTime * m_leaveSpeed;
+        //}
 
         //UpdateBasePosition();
         UpdateBehindOfTarget();
@@ -141,16 +136,22 @@ public class CameraController : MonoBehaviour
         m_behindOfTargetXZ = new Vector3(horizontalVector.x, 0, horizontalVector.y);
     }
 
-    // Controlled by player
+
     private void RotationCamera()
     {
+        //Cursor.lockState = CursorLockMode.Locked;
+
         m_currentMousePosition = m_mouseCurrent.position.ReadValue();
-        
-        Vector2 moveDistance = m_currentMousePosition - m_pastMousePosition;
-        this.transform.rotation = Quaternion.Euler(moveDistance.y * m_rotationSpeed,
-                                                    moveDistance.x * m_rotationSpeed,
-                                                   0);
-        //transform.Rotate(new Vector3(moveDistance.x, moveDistance.y, 0f));
+
+
+        m_fAngleX += (m_currentMousePosition.x - m_pastMousePosition.x) * m_sensitivity;
+        m_fAngleY += (m_currentMousePosition.y - m_pastMousePosition.y) * m_sensitivity;
+
+        if (m_fAngleX > 360.0f) m_fAngleX -= 360.0f;
+        if (m_fAngleY > 360.0f) m_fAngleY -= 360.0f;
+
+        transform.rotation = m_initialRotation;
+        transform.Rotate(-m_fAngleY * 360.0f / (2.0f * Mathf.PI), m_fAngleX * 360.0f / (2.0f * Mathf.PI), 0.0f, Space.World);
 
         m_pastMousePosition = m_currentMousePosition;
     }
@@ -164,4 +165,11 @@ public class CameraController : MonoBehaviour
     //{
 
     //}
+
+    private void Normalize(ref float value1, ref float value2)
+    {
+        float length = Mathf.Sqrt(value1 * value1 + value2 * value2);
+        value1 /= length;
+        value2 /= length;
+    }
 }

@@ -2,9 +2,6 @@ using System;
 using System.Reflection;
 using UnityEngine;
 
-
-//部位ごとのHPを持ち、HPが0になるとコライダーを無効化して非表示にする。
-//子オブジェクトに専用Colliderを付けて使う。
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
@@ -29,9 +26,7 @@ public class DefensePart : MonoBehaviour, IDamage
     public float CurrentHp { get; private set; }
     public bool IsBroken { get; private set; }
 
-
     public event Action<DefensePart> Broken;
-
 
     private static readonly FieldInfo StatusMaxHpField =
         typeof(StatusManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -50,7 +45,6 @@ public class DefensePart : MonoBehaviour, IDamage
         damageSourceLayers = LayerMask.GetMask("PlayerBullet", "EnemyBullet");
     }
 
-    //相手（弾など）のレイヤーが、ダメージを受けてよいレイヤーかを判定する
     public bool CanBeDamagedBy(GameObject source)
     {
         return (damageSourceLayers.value & (1 << source.layer)) != 0;
@@ -108,7 +102,6 @@ public class DefensePart : MonoBehaviour, IDamage
         Broken?.Invoke(this);
     }
 
-    //HPを全回復して部位を復活させる（リスポーンや再戦用）
     public void ResetPart()
     {
         IsBroken = false;

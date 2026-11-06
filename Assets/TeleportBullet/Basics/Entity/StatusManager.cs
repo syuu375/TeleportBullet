@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StatusManager : MonoBehaviour,IDamage
+public class　HPManager : MonoBehaviour,IDamage
 {
     [Header("ステータス設定")]
      protected float maxHp;

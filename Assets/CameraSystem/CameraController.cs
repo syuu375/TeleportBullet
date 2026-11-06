@@ -3,6 +3,13 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
+    [System.Serializable]
+    private enum Follow
+    {
+        BackOfTheHead,   // Behind of player perspective.
+        BehindPlayer,   // The height is constant.
+    }
+
     private Vector3 m_lookPosition;
 
     [Header("Component")]
@@ -13,6 +20,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector3 m_targetOffset;
     [SerializeField] private Vector2 m_targetPositionOnTheScreen;
     [SerializeField] private float m_sensitivity;
+    [SerializeField] private bool m_isFollowTarget;
+    [SerializeField] private Follow m_follow;
 
     //[Header("Rotation")]
     //[SerializeField] private float m_lookPlayDistance;
@@ -24,7 +33,6 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float m_cameraDistance;    // Distance from the viewport to the camera.
     [SerializeField] private float m_cameraHeight;      // Default camera height.
     [SerializeField] private float m_currentCameraHeight;   // test
-    [SerializeField] private float m_cameraPlayDistance;
     [SerializeField] private float m_leaveSpeed;
 
     [Header("State")]
@@ -35,15 +43,12 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector2 m_moveDistance;
     [SerializeField] private float m_fAngleX;
     [SerializeField] private float m_fAngleY;
-
-    [Header("Rotation")]
-    [SerializeField] private Vector3 m_initialPosition;
-    [SerializeField] private Quaternion m_initialRotation;
+    [SerializeField] private Vector2 m_targetOnTheScreenPoint;
 
     // Cache
     private Vector3 m_cameraPosition;
     private Vector3 m_targetPosition;
-    [SerializeField] private Quaternion m_cameraRotation;
+    private Quaternion m_initialRotation;
     Mouse m_mouseCurrent;
     
 
@@ -59,10 +64,14 @@ public class CameraController : MonoBehaviour
         //Vector3 cameraPosition = m_target.right * m_cameraOffset.x + m_target.up * m_cameraOffset.y + m_target.forward * m_cameraOffset.z;
 
         //m_transform.position = m_target.position + cameraPosition;
+
+        if (!m_isFollowTarget) return;
+
         UpdateCache();
         UpdateCameraPosition();
-
         RotationCamera();
+
+        AdjustCameraPosition();
 
         //transform.LookAt(m_lookPosition);
         //transform.LookAt(m_targetPosition);
@@ -72,68 +81,62 @@ public class CameraController : MonoBehaviour
     {
         m_cameraPosition = transform.position;
         m_targetPosition = m_target.position + m_targetOffset;
-        m_cameraRotation = transform.rotation;
     }
 
     private void Initialize()
     {
         m_mouseCurrent = Mouse.current;
 
-        UpdateBaseLocalPosition();
+        UpdateBehindTheTarget();
         m_currentMousePosition = m_mouseCurrent.position.ReadValue();
         m_pastMousePosition = m_currentMousePosition;
         m_fAngleX = 0;
         m_fAngleY = 0;
         
-        m_initialPosition = transform.position;
         m_initialRotation = Quaternion.identity;
     }
 
 
     private void UpdateCameraPosition()
     {
-        Vector3 horizontalVector = m_targetPosition - m_cameraPosition;
-        horizontalVector.y = 0;
-        float distance = horizontalVector.magnitude;
+        //Vector3 horizontalVector = m_targetPosition - m_cameraPosition;
+        //horizontalVector.y = 0;
+        //float distance = horizontalVector.magnitude;
 
-        //float moveDistance = 0;
-        //if (distance > m_cameraDistance + m_cameraPlayDistance)
-        //{
-        //    moveDistance = distance - (m_cameraDistance + m_cameraPlayDistance);
-        //    moveDistance *= Time.deltaTime * m_followSpeed;
-        //}
-        //else if (distance < m_cameraDistance + m_cameraPlayDistance)
-        //{
-        //    moveDistance = distance - (m_cameraDistance - m_cameraPlayDistance);
-        //    moveDistance *= Time.deltaTime * m_leaveSpeed;
-        //}
-
-        //UpdateBasePosition();
-        UpdateBehindOfTarget();
-        UpdateBaseLocalPosition();
+        switch (m_follow)
+        {
+            case Follow.BackOfTheHead: UpdateBackTheTargetHead(); break;
+            case Follow.BehindPlayer: UpdateBehindTheTarget(); break;
+        }
 
         transform.position = m_targetPosition + m_cameraBaseLocalPosition;
-        //Vector3 cameraPosition = m_cameraPosition + m_behindOfTargetXZ * moveDistance;
-        //cameraPosition.y = m_lookPosition.y + m_cameraHeight;
-        //transform.position = cameraPosition;
-        //m_currentCameraBasePosition += (horizontalVector * moveDistance);
-
-        //transform.position = m_currentCameraBasePosition;
     }
 
-    private void UpdateBaseLocalPosition()
+    // Camera position before adjustment.
+    private void UpdateBaseLocalPosition(Vector3 position)
     {
-        float distanceXZ = Mathf.Sqrt(m_cameraDistance * m_cameraDistance - m_cameraHeight * m_cameraHeight);
-        m_cameraBaseLocalPosition = m_behindOfTargetXZ * distanceXZ;
-        m_cameraBaseLocalPosition.y = m_cameraHeight;
+        m_cameraBaseLocalPosition = position;
+        m_cameraBaseLocalPosition.y += m_cameraHeight;
     }
 
     // Get behind of target horizontal position.
-    private void UpdateBehindOfTarget()
+    private void UpdateBehindTheTarget()
     {
         Vector3 behind = -m_target.forward;
         Vector2 horizontalVector = new Vector2(behind.x, behind.z).normalized;
-        m_behindOfTargetXZ = new Vector3(horizontalVector.x, 0, horizontalVector.y);
+        m_behindOfTargetXZ = new Vector3(horizontalVector.x, 0, horizontalVector.y); 
+
+        float distanceXZ = Mathf.Sqrt(m_cameraDistance * m_cameraDistance - m_cameraHeight * m_cameraHeight);
+        Vector3 localPosition = m_behindOfTargetXZ * distanceXZ;
+
+        UpdateBaseLocalPosition(localPosition);
+    }
+
+    // Behind of target direction.
+    private void UpdateBackTheTargetHead()
+    {
+        Vector3 behindOfLocalPos = (-transform.forward) * m_cameraDistance;
+        UpdateBaseLocalPosition(m_targetPosition + behindOfLocalPos);
     }
 
 
@@ -148,28 +151,24 @@ public class CameraController : MonoBehaviour
         m_fAngleY += (m_currentMousePosition.y - m_pastMousePosition.y) * m_sensitivity;
 
         if (m_fAngleX > 360.0f) m_fAngleX -= 360.0f;
-        if (m_fAngleY > 360.0f) m_fAngleY -= 360.0f;
+        if (m_fAngleY < -90.0f) m_fAngleY = -90.0f;
+        else if (m_fAngleY > 90.0f) m_fAngleY = 90.0f;
 
         transform.rotation = m_initialRotation;
-        transform.Rotate(-m_fAngleY * 360.0f / (2.0f * Mathf.PI), m_fAngleX * 360.0f / (2.0f * Mathf.PI), 0.0f, Space.World);
+        transform.Rotate(-m_fAngleY, m_fAngleX, 0.0f, Space.World);
+        //transform.Rotate(-m_fAngleY * 360.0f / (2.0f * Mathf.PI), m_fAngleX * 360.0f / (2.0f * Mathf.PI), 0.0f, Space.World);
 
         m_pastMousePosition = m_currentMousePosition;
     }
 
     private void AdjustCameraPosition()
     {
-
+        m_targetOnTheScreenPoint = Camera.main.WorldToScreenPoint(m_targetPosition);
     }
 
-    //private void AdjustCameraDirection()
-    //{
 
-    //}
-
-    private void Normalize(ref float value1, ref float value2)
+    public void SetIsFollow(bool value)
     {
-        float length = Mathf.Sqrt(value1 * value1 + value2 * value2);
-        value1 /= length;
-        value2 /= length;
+        m_isFollowTarget = value;
     }
 }

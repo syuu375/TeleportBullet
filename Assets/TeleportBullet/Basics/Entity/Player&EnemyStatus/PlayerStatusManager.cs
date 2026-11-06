@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerStatusManager : HPManager
 {
     [Header("ストレージの参照")]
-    private PlayerStatusStorage playerStatusStorage;
+    [SerializeField] private PlayerStatusStorage playerStatusStorage;
 
     [Header("プレイヤーID")]
     [SerializeField] public string playerID = "";

@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyStatusManager : HPManager
 {
     [Header("ストレージの参照")]
-    private EnemyStatusStorage enemyStatusStorage;
+    [SerializeField] private EnemyStatusStorage enemyStatusStorage;
     private int armorHp;
     private float currentarmorHP;
     private int Score;

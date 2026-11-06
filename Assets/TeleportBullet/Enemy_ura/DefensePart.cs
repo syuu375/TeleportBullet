@@ -6,7 +6,7 @@ public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
     [Tooltip("–¢İ’è‚È‚çe‚ÌStatusManager‚ğ©“®‚Å’T‚·")]
-    [SerializeField] private StatusManager status;
+    [SerializeField] private HPManager status;
 
     private float maxHp;
 
@@ -29,7 +29,7 @@ public class DefensePart : MonoBehaviour, IDamage
     public event Action<DefensePart> Broken;
 
     private static readonly FieldInfo StatusMaxHpField =
-        typeof(StatusManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
+        typeof(HPManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
 
     private bool TryGetStatusMaxHp(out float value)
     {
@@ -66,7 +66,7 @@ public class DefensePart : MonoBehaviour, IDamage
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<Renderer>();
 
-        if (status == null) status = GetComponentInParent<StatusManager>();
+        if (status == null) status = GetComponentInParent<HPManager>();
 
         if (TryGetStatusMaxHp(out float statusMaxHp))
         {

@@ -5,10 +5,11 @@ using UnityEngine;
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
-    [Tooltip("未設定なら親のStatusManagerを自動で探す")]
-    [SerializeField] private StatusManager status;
+    [Tooltip("未設定なら親のEnemyStatusManagerを自動で探す（部位のHPは外装HPを使う）")]
+    [SerializeField] private EnemyStatusManager status;
 
     private float maxHp;
+    private bool hpInitialized;
 
     [Header("被ダメージ")]
     [Tooltip("この部位が受けるダメージの係数。硬い部位は1未満、脆い部位は1より大きくする")]
@@ -22,21 +23,28 @@ public class DefensePart : MonoBehaviour, IDamage
     [SerializeField] private Collider[] colliders;
     [SerializeField] private Renderer[] renderers;
 
-    public float MaxHp => maxHp;
+    public float MaxHp
+    {
+        get
+        {
+            EnsureHpInitialized();
+            return maxHp;
+        }
+    }
     public float CurrentHp { get; private set; }
     public bool IsBroken { get; private set; }
 
     public event Action<DefensePart> Broken;
 
-    private static readonly FieldInfo StatusMaxHpField =
-        typeof(StatusManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo ArmorHpField =
+        typeof(EnemyStatusManager).GetField("armorHp", BindingFlags.Instance | BindingFlags.NonPublic);
 
-    private bool TryGetStatusMaxHp(out float value)
+    private bool TryGetArmorHp(out float value)
     {
         value = 0f;
-        if (status == null || StatusMaxHpField == null) return false;
+        if (status == null || ArmorHpField == null) return false;
 
-        value = (float)StatusMaxHpField.GetValue(status);
+        value = Convert.ToSingle(ArmorHpField.GetValue(status));
         return true;
     }
 
@@ -66,22 +74,39 @@ public class DefensePart : MonoBehaviour, IDamage
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<Renderer>();
 
-        if (status == null) status = GetComponentInParent<StatusManager>();
+        if (status == null) status = GetComponentInParent<EnemyStatusManager>();
+    }
 
-        if (TryGetStatusMaxHp(out float statusMaxHp))
+    private void Start()
+    {
+        EnsureHpInitialized();
+    }
+
+    private void EnsureHpInitialized()
+    {
+        if (hpInitialized) return;
+
+        RefreshMaxHp();
+        CurrentHp = maxHp;
+        hpInitialized = true;
+    }
+
+    private void RefreshMaxHp()
+    {
+        if (TryGetArmorHp(out float armorHp))
         {
-            maxHp = statusMaxHp;
+            maxHp = armorHp;
         }
         else
         {
-            Debug.LogError($"{name}: StatusManager からMaxHPを取得できませんでした", this);
+            Debug.LogError($"{name}: EnemyStatusManager から外装HPを取得できませんでした", this);
         }
-
-        CurrentHp = maxHp;
     }
 
     public void TakeDamage(float damage, float multiplier)
     {
+        EnsureHpInitialized();
+
         if (IsBroken) return;
 
         float finalDamage = damage * multiplier * damageTakenRate;
@@ -105,7 +130,9 @@ public class DefensePart : MonoBehaviour, IDamage
     public void ResetPart()
     {
         IsBroken = false;
+        RefreshMaxHp();
         CurrentHp = maxHp;
+        hpInitialized = true;
         SetActiveParts(true);
     }
 

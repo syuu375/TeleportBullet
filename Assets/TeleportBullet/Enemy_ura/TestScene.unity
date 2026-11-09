@@ -635,7 +635,7 @@ MonoBehaviour:
   CriticalDamage: 0
   enemyStatusStorage: {fileID: 1724151305}
   armorObject: {fileID: 0}
-  enemyID: 100
+  enemyID: 
 --- !u!1 &1512534971
 GameObject:
   m_ObjectHideFlags: 0

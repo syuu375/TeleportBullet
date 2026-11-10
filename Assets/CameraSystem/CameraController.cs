@@ -14,11 +14,12 @@ public class CameraController : MonoBehaviour
 
     [Header("Component")]
     [SerializeField] private Transform m_target;
+    private Camera m_camera;
 
     [Header("Setting")]
     //[SerializeField] private Vector3 m_cameraOffset;
     [SerializeField] private Vector3 m_targetOffset;
-    [SerializeField] private Vector2 m_targetPositionOnTheScreen;
+    [SerializeField] private Vector3 m_targetPositionOnTheViewportPoint;
     [SerializeField] private float m_sensitivity;
     [SerializeField] private bool m_isFollowTarget;
     [SerializeField] private Follow m_follow;
@@ -43,11 +44,14 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector2 m_moveDistance;
     [SerializeField] private float m_fAngleX;
     [SerializeField] private float m_fAngleY;
-    [SerializeField] private Vector2 m_targetOnTheScreenPoint;
+    [SerializeField] private Vector3 m_currentTargetPositionOnTheViewportPoint;
+    [SerializeField] private float m_baseDistance;
+    [SerializeField] private float m_divBaseDistance;
+    [SerializeField] private Vector3 m_adjustmentVector;
 
     // Cache
-    private Vector3 m_cameraPosition;
     private Vector3 m_targetPosition;
+    private Vector3 m_cameraPosition;
     private Quaternion m_initialRotation;
     Mouse m_mouseCurrent;
     
@@ -71,7 +75,6 @@ public class CameraController : MonoBehaviour
         UpdateCameraPosition();
         RotationCamera();
 
-        AdjustCameraPosition();
 
         //transform.LookAt(m_lookPosition);
         //transform.LookAt(m_targetPosition);
@@ -79,7 +82,6 @@ public class CameraController : MonoBehaviour
 
     private void UpdateCache()
     {
-        m_cameraPosition = transform.position;
         m_targetPosition = m_target.position + m_targetOffset;
     }
 
@@ -94,6 +96,8 @@ public class CameraController : MonoBehaviour
         m_fAngleY = 0;
         
         m_initialRotation = Quaternion.identity;
+        m_camera = this.GetComponent<Camera>();
+        CalculateBaseDistance();
     }
 
 
@@ -109,7 +113,12 @@ public class CameraController : MonoBehaviour
             case Follow.BehindPlayer: UpdateBehindTheTarget(); break;
         }
 
-        transform.position = m_targetPosition + m_cameraBaseLocalPosition;
+        m_cameraPosition = m_targetPosition + m_cameraBaseLocalPosition;
+        transform.position = m_cameraPosition;
+
+        AdjustCameraPosition();
+
+        transform.position = m_cameraPosition + m_adjustmentVector;
     }
 
     // Camera position before adjustment.
@@ -163,12 +172,38 @@ public class CameraController : MonoBehaviour
 
     private void AdjustCameraPosition()
     {
-        m_targetOnTheScreenPoint = Camera.main.WorldToScreenPoint(m_targetPosition);
+        //m_currentTargetPositionOnTheScreenPoint = m_camera.WorldToScreenPoint(m_targetPosition);    // debug
+        Vector3 currentTargetPosition = m_camera.WorldToViewportPoint(m_targetPosition);
+        m_currentTargetPositionOnTheViewportPoint = currentTargetPosition;
+
+        Vector3 difference = currentTargetPosition - m_targetPositionOnTheViewportPoint;
+        //Debug.Log($"difference: {difference}");
+        //Debug.Log($"transform.right: {transform.right}");
+        //m_adjustmentVector = (transform.right * difference.x * m_divBaseDistance);// - (transform.up * difference.y * m_divBaseDistance);
     }
 
 
     public void SetIsFollow(bool value)
     {
         m_isFollowTarget = value;
+    }
+
+    // カメラから1m前方のオブジェクトが1m横に移動した際のスクリーン上の移動距離
+    // The distance an object - located 1m in front of the camera - moves on the screen when it shifts 1m laterally.
+    private void CalculateBaseDistance()
+    {
+        Vector3 Temporary0 = transform.forward;
+        Vector3 Temporary1 = Temporary0 + transform.right;
+
+        //Vector2 v2Pos0 = m_camera.WorldToScreenPoint(Temporary0);
+        //Vector2 v2Pos1 = m_camera.WorldToScreenPoint(Temporary1);
+
+        Vector2 v2Pos0 = m_camera.WorldToViewportPoint(Temporary0);
+        Vector2 v2Pos1 = m_camera.WorldToViewportPoint(Temporary1);
+
+        m_baseDistance = Vector2.Distance(v2Pos0, v2Pos1);
+
+        // m_baseDistance won't become 0.
+        m_divBaseDistance = (1 / m_baseDistance) * m_cameraDistance;
     }
 }

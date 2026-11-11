@@ -309,7 +309,7 @@ MonoBehaviour:
   Critical: 0
   CriticalDamage: 0
   enemyStatusStorage: {fileID: 120974229}
-  armorObject: {fileID: 820255084}
+  armorObject: {fileID: 0}
   enemyID: 1
 --- !u!1 &820255084
 GameObject:

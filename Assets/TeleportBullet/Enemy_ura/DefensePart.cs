@@ -1,12 +1,13 @@
 using System;
-using System.Reflection;
 using UnityEngine;
 
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
-    [Tooltip("未設定なら親のStatusManagerを自動で探す")]
-    [SerializeField] private HPManager status;
+    [Tooltip("未設定なら親のEnemyStatusManagerを自動で探す（敵のIDを読むために使う）")]
+    [SerializeField] private EnemyStatusManager status;
+    [Tooltip("CSVを読み込んでいるストレージ。未設定ならシーンから自動で探す")]
+    [SerializeField] private EnemyStatusStorage storage;
 
     private float maxHp;
     private bool hpInitialized;
@@ -36,18 +37,6 @@ public class DefensePart : MonoBehaviour, IDamage
 
     public event Action<DefensePart> Broken;
 
-    private static readonly FieldInfo StatusMaxHpField =
-        typeof(HPManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
-
-    private bool TryGetArmorHp(out float value)
-    {
-        value = 0f;
-        if (status == null || ArmorHpField == null) return false;
-
-        value = Convert.ToSingle(ArmorHpField.GetValue(status));
-        return true;
-    }
-
     private void Reset()
     {
         damageSourceLayers = LayerMask.GetMask("PlayerBullet", "EnemyBullet");
@@ -74,8 +63,11 @@ public class DefensePart : MonoBehaviour, IDamage
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<Renderer>();
 
-        if (status == null) status = GetComponentInParent<HPManager>();
+        if (status == null) status = GetComponentInParent<EnemyStatusManager>();
+    }
 
+    // EnemyStatusStorage は Awake の中でCSVを読み込む。
+    // 読み込みが終わる前に参照しないよう、全部の Awake が終わったあとの Start で読む。
     private void Start()
     {
         EnsureHpInitialized();
@@ -92,14 +84,28 @@ public class DefensePart : MonoBehaviour, IDamage
 
     private void RefreshMaxHp()
     {
-        if (TryGetArmorHp(out float armorHp))
+        if (status == null)
         {
-            maxHp = armorHp;
+            Debug.LogError($"{name}: 親に EnemyStatusManager が見つかりません（敵のIDを読めません）", this);
+            return;
         }
-        else
+
+        if (storage == null) storage = FindFirstObjectByType<EnemyStatusStorage>();
+        if (storage == null)
         {
-            Debug.LogError($"{name}: EnemyStatusManager から外装HPを取得できませんでした", this);
+            Debug.LogError($"{name}: シーンに EnemyStatusStorage が見つかりません（CSVを読めません）", this);
+            return;
         }
+
+        // CSVの該当行（敵のID）から、外装HPを読む
+        EnemyStatsData stats = storage.GetEnemyStats(status.enemyID);
+        if (stats == null)
+        {
+            Debug.LogError($"{name}: ID「{status.enemyID}」のデータがCSVにありません", this);
+            return;
+        }
+
+        maxHp = stats.Armorhp;
     }
 
     public void TakeDamage(float damage, float multiplier)

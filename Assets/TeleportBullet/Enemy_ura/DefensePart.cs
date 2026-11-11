@@ -1,24 +1,23 @@
 using System;
-using System.Reflection;
 using UnityEngine;
 
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
-    [Tooltip("–¢İ’è‚È‚çe‚ÌStatusManager‚ğ©“®‚Å’T‚·")]
+    [Tooltip("æœªè¨­å®šãªã‚‰è¦ªã®StatusManagerã‚’è‡ªå‹•ã§æ¢ã™")]
     [SerializeField] private HPManager status;
 
     private float maxHp;
 
-    [Header("”íƒ_ƒ[ƒW")]
-    [Tooltip("‚±‚Ì•”ˆÊ‚ªó‚¯‚éƒ_ƒ[ƒW‚ÌŒW”Bd‚¢•”ˆÊ‚Í1–¢–AÆ‚¢•”ˆÊ‚Í1‚æ‚è‘å‚«‚­‚·‚é")]
+    [Header("è¢«ãƒ€ãƒ¡ãƒ¼ã‚¸")]
+    [Tooltip("ã“ã®éƒ¨ä½ãŒå—ã‘ã‚‹ãƒ€ãƒ¡ãƒ¼ã‚¸ã®ä¿‚æ•°ã€‚ç¡¬ã„éƒ¨ä½ã¯1æœªæº€ã€è„†ã„éƒ¨ä½ã¯1ã‚ˆã‚Šå¤§ããã™ã‚‹")]
     [SerializeField] private float damageTakenRate = 1f;
 
-    [Header("ƒ_ƒ[ƒW‚ğó‚¯‚é‘Šè‚ÌƒŒƒCƒ„[")]
-    [Tooltip("‚±‚±‚Å‘I‚ñ‚¾ƒŒƒCƒ„[‚ÌƒIƒuƒWƒFƒNƒgi’e‚È‚Çj‚É“–‚½‚Á‚½‚Æ‚«‚¾‚¯ƒ_ƒ[ƒW‚ğó‚¯‚é")]
+    [Header("ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ã‚‹ç›¸æ‰‹ã®ãƒ¬ã‚¤ãƒ¤ãƒ¼")]
+    [Tooltip("ã“ã“ã§é¸ã‚“ã ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼ˆå¼¾ãªã©ï¼‰ã«å½“ãŸã£ãŸã¨ãã ã‘ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ã‚‹")]
     [SerializeField] private LayerMask damageSourceLayers;
 
-    [Header("”j‰ó‘ÎÛi–¢İ’è‚È‚çq‚©‚ç©“®æ“¾j")]
+    [Header("ç ´å£Šå¯¾è±¡ï¼ˆæœªè¨­å®šãªã‚‰å­ã‹ã‚‰è‡ªå‹•å–å¾—ï¼‰")]
     [SerializeField] private Collider[] colliders;
     [SerializeField] private Renderer[] renderers;
 
@@ -66,15 +65,19 @@ public class DefensePart : MonoBehaviour, IDamage
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<Renderer>();
 
-        if (status == null) status = GetComponentInParent<HPManager>();
+        if (status == null) status = GetComponentInParent<EnemyStatusManager>();
+    }
 
         if (TryGetStatusMaxHp(out float statusMaxHp))
         {
             maxHp = statusMaxHp;
         }
-        else
+
+        // CSVç¸ºï½®éš§ï½²è –æ¥¢ï½¡é¯‰ï½¼åŸŸé›°ç¸ºï½®IDï¿½å³¨Â°ç¹§å³¨âˆï½¤å†¶ï½£ï¿½Pç¹§å®šï½ªï½­ç¹§
+        EnemyStatsData stats = storage.GetEnemyStats(status.enemyID);
+        if (stats == null)
         {
-            Debug.LogError($"{name}: StatusManager ‚©‚çMaxHP‚ğæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½", this);
+            Debug.LogError($"{name}: StatusManager ã‹ã‚‰MaxHPã‚’å–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸ", this);
         }
 
         CurrentHp = maxHp;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyStatusManager : StatusManager
+public class EnemyStatusManager : HPManager
 {
     [Header("ストレージの参照")]
     [SerializeField] private EnemyStatusStorage enemyStatusStorage;

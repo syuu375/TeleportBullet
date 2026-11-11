@@ -5,21 +5,21 @@ using UnityEngine;
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
-    [Tooltip("–¢İ’è‚È‚çe‚ÌEnemyStatusManager‚ğ©“®‚Å’T‚·i•”ˆÊ‚ÌHP‚ÍŠO‘•HP‚ğg‚¤j")]
-    [SerializeField] private EnemyStatusManager status;
+    [Tooltip("æœªè¨­å®šãªã‚‰è¦ªã®StatusManagerã‚’è‡ªå‹•ã§æ¢ã™")]
+    [SerializeField] private HPManager status;
 
     private float maxHp;
     private bool hpInitialized;
 
-    [Header("”íƒ_ƒ[ƒW")]
-    [Tooltip("‚±‚Ì•”ˆÊ‚ªó‚¯‚éƒ_ƒ[ƒW‚ÌŒW”Bd‚¢•”ˆÊ‚Í1–¢–AÆ‚¢•”ˆÊ‚Í1‚æ‚è‘å‚«‚­‚·‚é")]
+    [Header("è¢«ãƒ€ãƒ¡ãƒ¼ã‚¸")]
+    [Tooltip("ã“ã®éƒ¨ä½ãŒå—ã‘ã‚‹ãƒ€ãƒ¡ãƒ¼ã‚¸ã®ä¿‚æ•°ã€‚ç¡¬ã„éƒ¨ä½ã¯1æœªæº€ã€è„†ã„éƒ¨ä½ã¯1ã‚ˆã‚Šå¤§ããã™ã‚‹")]
     [SerializeField] private float damageTakenRate = 1f;
 
-    [Header("ƒ_ƒ[ƒW‚ğó‚¯‚é‘Šè‚ÌƒŒƒCƒ„[")]
-    [Tooltip("‚±‚±‚Å‘I‚ñ‚¾ƒŒƒCƒ„[‚ÌƒIƒuƒWƒFƒNƒgi’e‚È‚Çj‚É“–‚½‚Á‚½‚Æ‚«‚¾‚¯ƒ_ƒ[ƒW‚ğó‚¯‚é")]
+    [Header("ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ã‚‹ç›¸æ‰‹ã®ãƒ¬ã‚¤ãƒ¤ãƒ¼")]
+    [Tooltip("ã“ã“ã§é¸ã‚“ã ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼ˆå¼¾ãªã©ï¼‰ã«å½“ãŸã£ãŸã¨ãã ã‘ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ã‚‹")]
     [SerializeField] private LayerMask damageSourceLayers;
 
-    [Header("”j‰ó‘ÎÛi–¢İ’è‚È‚çq‚©‚ç©“®æ“¾j")]
+    [Header("ç ´å£Šå¯¾è±¡ï¼ˆæœªè¨­å®šãªã‚‰å­ã‹ã‚‰è‡ªå‹•å–å¾—ï¼‰")]
     [SerializeField] private Collider[] colliders;
     [SerializeField] private Renderer[] renderers;
 
@@ -36,8 +36,8 @@ public class DefensePart : MonoBehaviour, IDamage
 
     public event Action<DefensePart> Broken;
 
-    private static readonly FieldInfo ArmorHpField =
-        typeof(EnemyStatusManager).GetField("armorHp", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo StatusMaxHpField =
+        typeof(HPManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
 
     private bool TryGetArmorHp(out float value)
     {
@@ -74,8 +74,7 @@ public class DefensePart : MonoBehaviour, IDamage
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<Renderer>();
 
-        if (status == null) status = GetComponentInParent<EnemyStatusManager>();
-    }
+        if (status == null) status = GetComponentInParent<HPManager>();
 
     private void Start()
     {
@@ -99,7 +98,7 @@ public class DefensePart : MonoBehaviour, IDamage
         }
         else
         {
-            Debug.LogError($"{name}: EnemyStatusManager ‚©‚çŠO‘•HP‚ğæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½", this);
+            Debug.LogError($"{name}: EnemyStatusManager ã‹ã‚‰å¤–è£…HPã‚’å–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸ", this);
         }
     }
 

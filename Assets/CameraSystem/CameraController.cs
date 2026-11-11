@@ -6,45 +6,34 @@ public class CameraController : MonoBehaviour
     [System.Serializable]
     private enum Follow
     {
-        BackOfTheHead,   // Behind of player perspective.
-        BehindPlayer,   // The height is constant.
+        Free,
+        BackOfThePlayerHead,   // Behind of player perspective.
     }
-
-    private Vector3 m_lookPosition;
 
     [Header("Component")]
     [SerializeField] private Transform m_target;
     private Camera m_camera;
 
     [Header("Setting")]
-    //[SerializeField] private Vector3 m_cameraOffset;
     [SerializeField] private Vector3 m_targetOffset;
-    [SerializeField] private Vector3 m_targetPositionOnTheViewportPoint;
+    [SerializeField] private Vector2 m_targetPositionOnTheViewportPoint;
     [SerializeField] private float m_sensitivity;
     [SerializeField] private bool m_isFollowTarget;
     [SerializeField] private Follow m_follow;
 
-    //[Header("Rotation")]
-    //[SerializeField] private float m_lookPlayDistance;
-    //[SerializeField] private float m_followSpeed;
-    //[SerializeField] private float m_rotationSpeed;
-    //[SerializeField] private float m_turningAcceleration;
-
     [Header("Movement")]
     [SerializeField] private float m_cameraDistance;    // Distance from the viewport to the camera.
     [SerializeField] private float m_cameraHeight;      // Default camera height.
-    [SerializeField] private float m_currentCameraHeight;   // test
+    [SerializeField] private float m_approachSpeed;
     [SerializeField] private float m_leaveSpeed;
 
     [Header("State")]
     [SerializeField] private Vector3 m_cameraBaseLocalPosition;   // Camera position before shifting.
     [SerializeField] private Vector3 m_behindOfTargetXZ;    // Behind of target position, exclude y-coordinate.
-    [SerializeField] private Vector2 m_currentMousePosition;
-    [SerializeField] private Vector2 m_pastMousePosition;
-    [SerializeField] private Vector2 m_moveDistance;
-    [SerializeField] private float m_fAngleX;
-    [SerializeField] private float m_fAngleY;
-    [SerializeField] private Vector3 m_currentTargetPositionOnTheViewportPoint;
+    private Vector2 m_currentMousePosition;
+    private Vector2 m_pastMousePosition;
+    private float m_fAngleX;
+    private float m_fAngleY;
     [SerializeField] private float m_baseDistance;
     [SerializeField] private float m_divBaseDistance;
     [SerializeField] private Vector3 m_adjustmentVector;
@@ -88,6 +77,7 @@ public class CameraController : MonoBehaviour
     private void Initialize()
     {
         m_mouseCurrent = Mouse.current;
+        m_isFollowTarget = true;
 
         UpdateBehindTheTarget();
         m_currentMousePosition = m_mouseCurrent.position.ReadValue();
@@ -98,6 +88,16 @@ public class CameraController : MonoBehaviour
         m_initialRotation = Quaternion.identity;
         m_camera = this.GetComponent<Camera>();
         CalculateBaseDistance();
+
+        var tPOTVP = m_targetPositionOnTheViewportPoint;
+        if (tPOTVP.x < 0 || 1 < tPOTVP.x)
+        {
+            Debug.LogWarning($"These are viewport coordinates, so please input values in the range of 0 to 1. m_targetPositionOnTheViewportPoint.x: {tPOTVP.x}");
+        }
+        if (tPOTVP.y < 0 || 1 < tPOTVP.y)
+        {
+            Debug.LogWarning($"These are viewport coordinates, so please input values in the range of 0 to 1. m_targetPositionOnTheViewportPoint.y: {tPOTVP.y}");
+        }
     }
 
 
@@ -109,8 +109,8 @@ public class CameraController : MonoBehaviour
 
         switch (m_follow)
         {
-            case Follow.BackOfTheHead: UpdateBackTheTargetHead(); break;
-            case Follow.BehindPlayer: UpdateBehindTheTarget(); break;
+            case Follow.Free: m_isFollowTarget = false; break;
+            case Follow.BackOfThePlayerHead: UpdateBackTheTargetHead(); break;
         }
 
         m_cameraPosition = m_targetPosition + m_cameraBaseLocalPosition;
@@ -120,6 +120,7 @@ public class CameraController : MonoBehaviour
 
         transform.position = m_cameraPosition + m_adjustmentVector;
     }
+
 
     // Camera position before adjustment.
     private void UpdateBaseLocalPosition(Vector3 position)
@@ -172,14 +173,10 @@ public class CameraController : MonoBehaviour
 
     private void AdjustCameraPosition()
     {
-        //m_currentTargetPositionOnTheScreenPoint = m_camera.WorldToScreenPoint(m_targetPosition);    // debug
-        Vector3 currentTargetPosition = m_camera.WorldToViewportPoint(m_targetPosition);
-        m_currentTargetPositionOnTheViewportPoint = currentTargetPosition;
-
+        Vector2 currentTargetPosition = m_camera.WorldToViewportPoint(m_targetPosition);
         Vector3 difference = currentTargetPosition - m_targetPositionOnTheViewportPoint;
-        //Debug.Log($"difference: {difference}");
-        //Debug.Log($"transform.right: {transform.right}");
-        //m_adjustmentVector = (transform.right * difference.x * m_divBaseDistance);// - (transform.up * difference.y * m_divBaseDistance);
+
+        m_adjustmentVector = (transform.right * difference.x * m_divBaseDistance);// - (transform.up * difference.y * m_divBaseDistance);
     }
 
 
@@ -204,6 +201,6 @@ public class CameraController : MonoBehaviour
         m_baseDistance = Vector2.Distance(v2Pos0, v2Pos1);
 
         // m_baseDistance won't become 0.
-        m_divBaseDistance = (1 / m_baseDistance) * m_cameraDistance;
+        m_divBaseDistance = (1 / m_baseDistance);// * m_cameraDistance;
     }
 }

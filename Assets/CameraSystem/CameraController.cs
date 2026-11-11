@@ -16,7 +16,7 @@ public class CameraController : MonoBehaviour
 
     [Header("Setting")]
     [SerializeField] private Vector3 m_targetOffset;
-    [SerializeField] private Vector2 m_targetPositionOnTheViewportPoint;
+    [SerializeField] private Vector2 m_targetPositionOnTheViewportPoint; // y can be 0.
     [SerializeField] private float m_sensitivity;
     [SerializeField] private bool m_isFollowTarget;
     [SerializeField] private Follow m_follow;
@@ -24,19 +24,19 @@ public class CameraController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float m_cameraDistance;    // Distance from the viewport to the camera.
     [SerializeField] private float m_cameraHeight;      // Default camera height.
-    [SerializeField] private float m_approachSpeed;
-    [SerializeField] private float m_leaveSpeed;
+    //[SerializeField] private float m_approachSpeed;
+    //[SerializeField] private float m_leaveSpeed;
 
-    [Header("State")]
-    [SerializeField] private Vector3 m_cameraBaseLocalPosition;   // Camera position before shifting.
-    [SerializeField] private Vector3 m_behindOfTargetXZ;    // Behind of target position, exclude y-coordinate.
+    //[Header("State")]
+    private Vector3 m_cameraBaseLocalPosition;   // Camera position before shifting.
+    private Vector3 m_behindOfTargetXZ;    // Behind of target position, exclude y-coordinate.
     private Vector2 m_currentMousePosition;
     private Vector2 m_pastMousePosition;
     private float m_fAngleX;
     private float m_fAngleY;
-    [SerializeField] private float m_baseDistance;
-    [SerializeField] private float m_divBaseDistance;
-    [SerializeField] private Vector3 m_adjustmentVector;
+    private float m_baseDistance;
+    private float m_divBaseDistance;
+    private Vector3 m_adjustmentVector;
 
     // Cache
     private Vector3 m_targetPosition;

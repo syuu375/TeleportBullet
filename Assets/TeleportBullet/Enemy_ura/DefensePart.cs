@@ -4,13 +4,10 @@ using UnityEngine;
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
-    [Tooltip("未設定なら親のEnemyStatusManagerを自動で探す（敵のIDを読むために使う）")]
-    [SerializeField] private EnemyStatusManager status;
-    [Tooltip("CSVを読み込んでいるストレージ。未設定ならシーンから自動で探す")]
-    [SerializeField] private EnemyStatusStorage storage;
+    [Tooltip("未設定なら親のStatusManagerを自動で探す")]
+    [SerializeField] private HPManager status;
 
     private float maxHp;
-    private bool hpInitialized;
 
     [Header("被ダメージ")]
     [Tooltip("この部位が受けるダメージの係数。硬い部位は1未満、脆い部位は1より大きくする")]
@@ -24,18 +21,23 @@ public class DefensePart : MonoBehaviour, IDamage
     [SerializeField] private Collider[] colliders;
     [SerializeField] private Renderer[] renderers;
 
-    public float MaxHp
-    {
-        get
-        {
-            EnsureHpInitialized();
-            return maxHp;
-        }
-    }
+    public float MaxHp => maxHp;
     public float CurrentHp { get; private set; }
     public bool IsBroken { get; private set; }
 
     public event Action<DefensePart> Broken;
+
+    private static readonly FieldInfo StatusMaxHpField =
+        typeof(HPManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    private bool TryGetStatusMaxHp(out float value)
+    {
+        value = 0f;
+        if (status == null || StatusMaxHpField == null) return false;
+
+        value = (float)StatusMaxHpField.GetValue(status);
+        return true;
+    }
 
     private void Reset()
     {
@@ -66,52 +68,23 @@ public class DefensePart : MonoBehaviour, IDamage
         if (status == null) status = GetComponentInParent<EnemyStatusManager>();
     }
 
-    // EnemyStatusStorage は Awake の中でCSVを読み込む。
-    // 読み込みが終わる前に参照しないよう、全部の Awake が終わったあとの Start で読む。
-    private void Start()
-    {
-        EnsureHpInitialized();
-    }
-
-    private void EnsureHpInitialized()
-    {
-        if (hpInitialized) return;
-
-        RefreshMaxHp();
-        CurrentHp = maxHp;
-        hpInitialized = true;
-    }
-
-    private void RefreshMaxHp()
-    {
-        if (status == null)
+        if (TryGetStatusMaxHp(out float statusMaxHp))
         {
-            Debug.LogError($"{name}: 親に EnemyStatusManager が見つかりません（敵のIDを読めません）", this);
-            return;
+            maxHp = statusMaxHp;
         }
 
-        if (storage == null) storage = FindFirstObjectByType<EnemyStatusStorage>();
-        if (storage == null)
-        {
-            Debug.LogError($"{name}: シーンに EnemyStatusStorage が見つかりません（CSVを読めません）", this);
-            return;
-        }
-
-        // CSVの該当行（敵のID）から、外装HPを読む
+        // CSV縺ｮ隧ｲ蠖楢｡鯉ｼ域雰縺ｮID�峨°繧峨∝､冶｣�P繧定ｪｭ繧
         EnemyStatsData stats = storage.GetEnemyStats(status.enemyID);
         if (stats == null)
         {
-            Debug.LogError($"{name}: ID「{status.enemyID}」のデータがCSVにありません", this);
-            return;
+            Debug.LogError($"{name}: StatusManager からMaxHPを取得できませんでした", this);
         }
 
-        maxHp = stats.Armorhp;
+        CurrentHp = maxHp;
     }
 
     public void TakeDamage(float damage, float multiplier)
     {
-        EnsureHpInitialized();
-
         if (IsBroken) return;
 
         float finalDamage = damage * multiplier * damageTakenRate;
@@ -135,9 +108,7 @@ public class DefensePart : MonoBehaviour, IDamage
     public void ResetPart()
     {
         IsBroken = false;
-        RefreshMaxHp();
         CurrentHp = maxHp;
-        hpInitialized = true;
         SetActiveParts(true);
     }
 

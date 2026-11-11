@@ -5,32 +5,24 @@ using UnityEngine;
 public class DefensePart : MonoBehaviour, IDamage
 {
     [Header("HP")]
-    [Tooltip("Êú™Ë®≠ÂÆö„Å™„ÇâË¶™„ÅÆStatusManager„ÇíËá™Âãï„ÅßÊé¢„Åô")]
+    [Tooltip("ñ¢ê›íËÇ»ÇÁêeÇÃStatusManagerÇé©ìÆÇ≈íTÇ∑")]
     [SerializeField] private HPManager status;
 
     private float maxHp;
-    private bool hpInitialized;
 
-    [Header("Ë¢´„ÉÄ„É°„Éº„Ç∏")]
-    [Tooltip("„Åì„ÅÆÈÉ®‰Ωç„ÅåÂèó„Åë„Çã„ÉÄ„É°„Éº„Ç∏„ÅÆ‰øÇÊï∞„ÄÇÁ°¨„ÅÑÈÉ®‰Ωç„ÅØ1Êú™Ê∫Ä„ÄÅËÑÜ„ÅÑÈÉ®‰Ωç„ÅØ1„Çà„ÇäÂ§ß„Åç„Åè„Åô„Çã")]
+    [Header("îÌÉ_ÉÅÅ[ÉW")]
+    [Tooltip("Ç±ÇÃïîà Ç™éÛÇØÇÈÉ_ÉÅÅ[ÉWÇÃåWêîÅBçdÇ¢ïîà ÇÕ1ñ¢ñûÅAê∆Ç¢ïîà ÇÕ1ÇÊÇËëÂÇ´Ç≠Ç∑ÇÈ")]
     [SerializeField] private float damageTakenRate = 1f;
 
-    [Header("„ÉÄ„É°„Éº„Ç∏„ÇíÂèó„Åë„ÇãÁõ∏Êâã„ÅÆ„É¨„Ç§„É§„Éº")]
-    [Tooltip("„Åì„Åì„ÅßÈÅ∏„Çì„Å†„É¨„Ç§„É§„Éº„ÅÆ„Ç™„Éñ„Ç∏„Çß„ÇØ„ÉàÔºàÂºæ„Å™„Å©Ôºâ„Å´ÂΩì„Åü„Å£„Åü„Å®„Åç„Å†„Åë„ÉÄ„É°„Éº„Ç∏„ÇíÂèó„Åë„Çã")]
+    [Header("É_ÉÅÅ[ÉWÇéÛÇØÇÈëäéËÇÃÉåÉCÉÑÅ[")]
+    [Tooltip("Ç±Ç±Ç≈ëIÇÒÇæÉåÉCÉÑÅ[ÇÃÉIÉuÉWÉFÉNÉgÅiíeÇ»Ç«ÅjÇ…ìñÇΩÇ¡ÇΩÇ∆Ç´ÇæÇØÉ_ÉÅÅ[ÉWÇéÛÇØÇÈ")]
     [SerializeField] private LayerMask damageSourceLayers;
 
-    [Header("Á†¥Â£äÂØæË±°ÔºàÊú™Ë®≠ÂÆö„Å™„ÇâÂ≠ê„Åã„ÇâËá™ÂãïÂèñÂæóÔºâ")]
+    [Header("îjâÛëŒè€Åiñ¢ê›íËÇ»ÇÁéqÇ©ÇÁé©ìÆéÊìæÅj")]
     [SerializeField] private Collider[] colliders;
     [SerializeField] private Renderer[] renderers;
 
-    public float MaxHp
-    {
-        get
-        {
-            EnsureHpInitialized();
-            return maxHp;
-        }
-    }
+    public float MaxHp => maxHp;
     public float CurrentHp { get; private set; }
     public bool IsBroken { get; private set; }
 
@@ -39,12 +31,12 @@ public class DefensePart : MonoBehaviour, IDamage
     private static readonly FieldInfo StatusMaxHpField =
         typeof(HPManager).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic);
 
-    private bool TryGetArmorHp(out float value)
+    private bool TryGetStatusMaxHp(out float value)
     {
         value = 0f;
-        if (status == null || ArmorHpField == null) return false;
+        if (status == null || StatusMaxHpField == null) return false;
 
-        value = Convert.ToSingle(ArmorHpField.GetValue(status));
+        value = (float)StatusMaxHpField.GetValue(status);
         return true;
     }
 
@@ -76,36 +68,20 @@ public class DefensePart : MonoBehaviour, IDamage
 
         if (status == null) status = GetComponentInParent<HPManager>();
 
-    private void Start()
-    {
-        EnsureHpInitialized();
-    }
-
-    private void EnsureHpInitialized()
-    {
-        if (hpInitialized) return;
-
-        RefreshMaxHp();
-        CurrentHp = maxHp;
-        hpInitialized = true;
-    }
-
-    private void RefreshMaxHp()
-    {
-        if (TryGetArmorHp(out float armorHp))
+        if (TryGetStatusMaxHp(out float statusMaxHp))
         {
-            maxHp = armorHp;
+            maxHp = statusMaxHp;
         }
         else
         {
-            Debug.LogError($"{name}: EnemyStatusManager „Åã„ÇâÂ§ñË£ÖHP„ÇíÂèñÂæó„Åß„Åç„Åæ„Åõ„Çì„Åß„Åó„Åü", this);
+            Debug.LogError($"{name}: StatusManager Ç©ÇÁMaxHPÇéÊìæÇ≈Ç´Ç‹ÇπÇÒÇ≈ÇµÇΩ", this);
         }
+
+        CurrentHp = maxHp;
     }
 
     public void TakeDamage(float damage, float multiplier)
     {
-        EnsureHpInitialized();
-
         if (IsBroken) return;
 
         float finalDamage = damage * multiplier * damageTakenRate;
@@ -129,9 +105,7 @@ public class DefensePart : MonoBehaviour, IDamage
     public void ResetPart()
     {
         IsBroken = false;
-        RefreshMaxHp();
         CurrentHp = maxHp;
-        hpInitialized = true;
         SetActiveParts(true);
     }
 

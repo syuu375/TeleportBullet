@@ -22,8 +22,21 @@ public class ObjectPoolManager : MonoBehaviour
         m_transform = transform;
         for (int i = 0; i < m_poolCount; i++)
         {
-
+            AddToPool();
         }
+    }
+
+    public GameObject GetObjectFromPool()
+    {
+        return GetFromPool(m_objectPool);
+    }
+
+    protected T GetFromPool<T>(List<T> list)
+    {
+        int index = GetIndexFromPool();
+        T obj = list.ElementAt(index);
+        m_inUseQue.Add(index);
+        return obj;
     }
 
     protected int GetIndexFromPool()

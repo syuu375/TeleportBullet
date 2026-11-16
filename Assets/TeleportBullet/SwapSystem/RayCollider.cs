@@ -18,8 +18,10 @@ public class RayCollider
     private Ray m_ray;
     private bool m_isVisible;   // Display ray collision detection in the Unity Editor.
 
+
     public Collider EmitCollider(RayData rayData)
     {
+        Debug.Log("EmitCollider");
         m_ray = new Ray(rayData.origin, rayData.direction);
 
         if (m_isVisible)

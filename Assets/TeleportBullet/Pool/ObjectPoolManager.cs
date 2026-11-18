@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ObjectPoolManager : MonoBehaviour
 {
+    //[SerializeField] protected Logger m_logger;
     [SerializeField] protected GameObject m_prefab;
     [SerializeField] protected int m_poolCount;
     [SerializeField] protected bool m_forcePoolCount = true;
@@ -41,9 +42,11 @@ public class ObjectPoolManager : MonoBehaviour
 
     protected int GetIndexFromPool()
     {
+        Debug.Log($"[GIFP]m_objectPool: {m_objectPool}");
         var x = m_objectPool
-           .Select((obj, index) => new { obj, index })
-           .FirstOrDefault(x => !m_inUseQue.Contains(x.index));
+            .Select((obj, index) => new { obj, index })
+            .FirstOrDefault(x => !m_inUseQue.Contains(x.index));
+        Debug.Log($"[GIFP]x: {x}");
         int index;
         if (x == null)
         {
@@ -77,7 +80,7 @@ public class ObjectPoolManager : MonoBehaviour
         GameObject obj = Instantiate(m_prefab, m_transform);
         obj.SetActive(false);
 
-        int index = m_objectPool.Count;
+        int index = m_objectPool.Count();
         obj.name += index;
 
         if (!obj.TryGetComponent<ReturnObjectToPool>(out var rotp))

@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.VFX;
 using UnityEngine.InputSystem;
+using System.ComponentModel;
+using System;
 
 //Å•âº----------------------
 public class  EntityData
@@ -11,7 +13,6 @@ public class  EntityData
     public int ID => id;
 }
 //Å£------------------------
-
 
 public class SwapController : MonoBehaviour
 {
@@ -30,9 +31,11 @@ public class SwapController : MonoBehaviour
     private PlayerInputActions m_inputAction;
 
     private RayCollider m_rayCollider = new(true);
-    private Transform m_transform;  // my transform
-    private Transform m_target;     // target transform
     private bool m_hasTargetChanged;    // Becomes true only when the target is changed.
+    private Transform m_transform;  // my transform
+
+    [Header("Current Target")]
+    [SerializeField, ReadOnly] private Transform m_target;     // target transform
 
     private void Awake()
     {
@@ -56,19 +59,19 @@ public class SwapController : MonoBehaviour
         {
             origin = myTransform.position,
             direction = myTransform.forward,
-            range = m_rangeOfRay
+            maxDistance = m_rangeOfRay
         };
         Collider target = m_rayCollider.EmitCollider(rayData);
 
         if (target == null)
         {
-            Debug.Log("[ESS]target == null");
+            //Debug.Log("[ESS]target == null");
             m_target = null;
             m_marker.gameObject.SetActive(false);
             return;
         }
 
-        Debug.Log($"[ESS]target: {target.gameObject}");
+        //Debug.Log($"[ESS]target: {target.gameObject}");
         Transform targetTransform = target.gameObject.transform;
         if (m_target == targetTransform) m_hasTargetChanged = true;
         m_target = targetTransform;
@@ -84,7 +87,7 @@ public class SwapController : MonoBehaviour
             m_markerAnim.SetTrigger("LockOn");
         }
 
-
+        
     }
 
     private IEnumerator LightEmissionOfSwap()
@@ -121,13 +124,14 @@ public class SwapController : MonoBehaviour
 
     private void OnAttackTeleport(InputAction.CallbackContext context)
     {
-        Debug.Log("OnAttackTeleport");
+        //Debug.Log("OnAttackTeleport");
 
         if (m_target == null)
         {
-            Debug.Log("[OAT]target == null");
+            //Debug.Log("[OAT]target == null");
             return;
         }
-        Debug.Log($"m_target: {m_target.position}");
+        Debug.Log($"[OAT]m_target: {m_target.position}");
+        StartCoroutine(LightEmissionOfSwap());
     }
 }

@@ -5,7 +5,7 @@ public class RayData
 {
     public Vector3 origin;      // ‹N“_
     public Vector3 direction;   // •ûŒü
-    public float range;         // ŽË’ö‹——£
+    public float maxDistance;   // ŽË’ö‹——£
 }
 
 public class RayCollider
@@ -21,16 +21,16 @@ public class RayCollider
 
     public Collider EmitCollider(RayData rayData)
     {
-        Debug.Log("EmitCollider");
+        //Debug.Log("EmitCollider");
         m_ray = new Ray(rayData.origin, rayData.direction);
 
         if (m_isVisible)
         {
-            Debug.DrawRay(rayData.origin, rayData.direction * rayData.range, Color.red, 2.0f);
+            Debug.DrawRay(rayData.origin, rayData.direction * rayData.maxDistance, Color.red, 2.0f);
         }
 
         RaycastHit hit;
-        Physics.Raycast(m_ray, out hit, rayData.range);
+        Physics.Raycast(m_ray, out hit, rayData.maxDistance);
 
         return hit.collider;
     }

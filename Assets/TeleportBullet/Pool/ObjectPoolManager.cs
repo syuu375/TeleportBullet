@@ -13,6 +13,7 @@ public class ObjectPoolManager : MonoBehaviour
     protected List<int> m_inUseQue;
 
     private Transform m_transform;
+    protected List<Transform> m_objectsTransform;
 
     public int ObjectsInPool => m_objectPool.Count;
 
@@ -20,10 +21,12 @@ public class ObjectPoolManager : MonoBehaviour
     {
         m_objectPool = new();
         m_inUseQue = new();
+        m_objectsTransform = new();
         m_transform = transform;
         for (int i = 0; i < m_poolCount; i++)
         {
             AddToPool();
+            m_objectsTransform.Add(m_objectPool[i].transform);
         }
     }
 
@@ -43,10 +46,14 @@ public class ObjectPoolManager : MonoBehaviour
     protected int GetIndexFromPool()
     {
         Debug.Log($"[GIFP]m_objectPool: {m_objectPool}");
+        Debug.Log($"[GIFP]objPool.count: {m_objectPool.Count}");
+        Debug.Log($"[GIFP]useQue.count: {m_inUseQue.Count}");
+
         var x = m_objectPool
             .Select((obj, index) => new { obj, index })
             .FirstOrDefault(x => !m_inUseQue.Contains(x.index));
         Debug.Log($"[GIFP]x: {x}");
+
         int index;
         if (x == null)
         {

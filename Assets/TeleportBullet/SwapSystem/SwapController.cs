@@ -2,8 +2,6 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.VFX;
 using UnityEngine.InputSystem;
-using System.ComponentModel;
-using System;
 
 //Å•âº----------------------
 public class  EntityData
@@ -20,9 +18,10 @@ public class SwapController : MonoBehaviour
     [SerializeField] private VisualEffect m_visualEffectPrefab;
     [SerializeField] private Camera m_camera;
     [SerializeField] private Transform m_marker;    // Target marker
-    [SerializeField] private Animator m_markerAnim; // Marker animation
+    [SerializeField] private MyAnimator m_markerAnim;
 
     [Header("Parameter")]
+    [SerializeField] private SightData m_sightData;
     [SerializeField] private float m_coolTime;      // Time until teleportation becomes available again
     [SerializeField] private float m_preparatory;   // Swap wind-up Time
     [SerializeField] private float m_afterSwap;     // Time after swap
@@ -30,9 +29,10 @@ public class SwapController : MonoBehaviour
 
     private PlayerInputActions m_inputAction;
 
+    private SightChecker m_sightChecker = new(true);
     private RayCollider m_rayCollider = new(true);
+    private Transform m_transform;      // self transform
     private bool m_hasTargetChanged;    // Becomes true only when the target is changed.
-    private Transform m_transform;  // my transform
 
     [Header("Current Target")]
     [SerializeField, ReadOnly] private Transform m_target;     // target transform
@@ -44,13 +44,19 @@ public class SwapController : MonoBehaviour
 
         m_inputAction = new PlayerInputActions();
         m_inputAction.Player.AttackTeleport.performed += OnAttackTeleport;
-
         m_inputAction.Enable();
     }
 
     private void Update()
     {
+        UpdateSightData();
         EmitSkillSwap(m_transform);
+    }
+
+    private void UpdateSightData()
+    {
+        m_sightData.origin = m_transform.position;
+        m_sightData.direction = m_transform.forward;
     }
 
     public void EmitSkillSwap(Transform myTransform)
@@ -73,18 +79,23 @@ public class SwapController : MonoBehaviour
 
         //Debug.Log($"[ESS]target: {target.gameObject}");
         Transform targetTransform = target.gameObject.transform;
-        if (m_target == targetTransform) m_hasTargetChanged = true;
+        if (m_target == targetTransform) m_hasTargetChanged = false;
+        else m_hasTargetChanged = true;
+
         m_target = targetTransform;
         SetAiming(m_target);
     }
-
 
     private void SetAiming(Transform target)
     {
         if (m_hasTargetChanged)
         {
-            m_marker.gameObject.SetActive(true);
-            m_markerAnim.SetTrigger("LockOn");
+            if (!m_marker.gameObject.activeSelf)
+            {
+                m_marker.gameObject.SetActive(true);
+            }
+            //m_markerAnim.SetTrigger("LockOn");
+            m_markerAnim.SetTrigger(0); // lock on animation
         }
 
         
@@ -109,6 +120,7 @@ public class SwapController : MonoBehaviour
         m_target.position = tarPosition;
     }
 
+    // Play animation of swap.
     private void PlayAnimation()
     {
         //vfx animation(warp effect)

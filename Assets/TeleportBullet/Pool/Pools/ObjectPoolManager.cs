@@ -45,14 +45,9 @@ public class ObjectPoolManager : MonoBehaviour
 
     protected int GetIndexFromPool()
     {
-        Debug.Log($"[GIFP]m_objectPool: {m_objectPool}");
-        Debug.Log($"[GIFP]objPool.count: {m_objectPool.Count}");
-        Debug.Log($"[GIFP]useQue.count: {m_inUseQue.Count}");
-
         var x = m_objectPool
             .Select((obj, index) => new { obj, index })
             .FirstOrDefault(x => !m_inUseQue.Contains(x.index));
-        Debug.Log($"[GIFP]x: {x}");
 
         int index;
         if (x == null)
@@ -98,4 +93,5 @@ public class ObjectPoolManager : MonoBehaviour
         m_objectPool.Add(rotp.gameObject);
         return index;
     }
+
 }

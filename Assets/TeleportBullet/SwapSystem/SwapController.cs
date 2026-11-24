@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.VFX;
 using UnityEngine.InputSystem;
 
@@ -16,6 +17,7 @@ public class SwapController : MonoBehaviour
 {
     [Header("Component")]
     [SerializeField] private VisualEffect m_visualEffectPrefab;
+    [SerializeField] private Middleman_Object m_middlemanObject;
     [SerializeField] private Camera m_camera;
     [SerializeField] private Transform m_marker;    // Target marker
     [SerializeField] private MyAnimator m_markerAnim;
@@ -25,12 +27,13 @@ public class SwapController : MonoBehaviour
     [SerializeField] private float m_coolTime;      // Time until teleportation becomes available again
     [SerializeField] private float m_preparatory;   // Swap wind-up Time
     [SerializeField] private float m_afterSwap;     // Time after swap
-    [SerializeField] private float m_rangeOfRay;
+    //[SerializeField] private float m_rangeOfRay;
+    //[SerializeField] private float m_viewingAngle;
 
     private PlayerInputActions m_inputAction;
 
     private SightChecker m_sightChecker = new(true);
-    private RayCollider m_rayCollider = new(true);
+    //private RayCollider m_rayCollider = new(true);
     private Transform m_transform;      // self transform
     private bool m_hasTargetChanged;    // Becomes true only when the target is changed.
 
@@ -59,15 +62,20 @@ public class SwapController : MonoBehaviour
         m_sightData.direction = m_transform.forward;
     }
 
-    public void EmitSkillSwap(Transform myTransform)
+    public void EmitSkillSwap(Transform selfTransform)
     {
-        RayData rayData = new()
-        {
-            origin = myTransform.position,
-            direction = myTransform.forward,
-            maxDistance = m_rangeOfRay
-        };
-        Collider target = m_rayCollider.EmitCollider(rayData);
+        //SightData sightData = new()
+        //{
+        //    origin = selfTransform.position,
+        //    direction = selfTransform.forward,
+        //    maxDistance = m_rangeOfRay,
+        //    viewingAngle = m_viewingAngle
+        //};
+
+        //Debug.Log("EmitSkillSwap");
+
+        m_sightChecker.UpdateObjTransform(selfTransform, m_middlemanObject.Objects);
+        Transform target = m_sightChecker.AutoAim(m_sightData);
 
         if (target == null)
         {
@@ -77,16 +85,15 @@ public class SwapController : MonoBehaviour
             return;
         }
 
-        //Debug.Log($"[ESS]target: {target.gameObject}");
-        Transform targetTransform = target.gameObject.transform;
-        if (m_target == targetTransform) m_hasTargetChanged = false;
+        Debug.Log($"[ESS]target: {target.gameObject}");
+        if (m_target == target) m_hasTargetChanged = false;
         else m_hasTargetChanged = true;
 
-        m_target = targetTransform;
-        SetAiming(m_target);
+        m_target = target;
+        DisplayMarker(m_target);
     }
 
-    private void SetAiming(Transform target)
+    private void DisplayMarker(Transform target)
     {
         if (m_hasTargetChanged)
         {

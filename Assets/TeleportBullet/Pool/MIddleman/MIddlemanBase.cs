@@ -8,13 +8,13 @@ public class MiddlemanBase<T_Enum, T_Pool, T_Component> : MonoBehaviour
     where T_Pool : ComponentPoolHandler<T_Component>
 {
     [System.Serializable]
-    private struct Entry
+    protected struct Entry
     {
         public T_Enum key;
         public T_Pool pool;
     }
 
-    [SerializeField] private List<Entry> pools;
+    [SerializeField] protected List<Entry> pools;
 
     public void InitializePool()
     {

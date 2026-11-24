@@ -527,6 +527,7 @@ MonoBehaviour:
   pools:
   - key: 0
     pool: {fileID: 1893273020}
+  m_objects: []
 --- !u!4 &735000981
 Transform:
   m_ObjectHideFlags: 0
@@ -808,18 +809,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwapController
   m_visualEffectPrefab: {fileID: 0}
-  m_camera: {fileID: 0}
+  m_middlemanObject: {fileID: 735000980}
+  m_camera: {fileID: 518020926}
   m_marker: {fileID: 1462906542}
   m_markerAnim: {fileID: 754335975}
   m_sightData:
     origin: {x: 0, y: 0, z: 0}
     direction: {x: 0, y: 0, z: 0}
-    maxDistance: 0
-    viewingAngle: 0
+    maxDistance: 100
+    viewingAngle: 20
   m_coolTime: 5
   m_preparatory: 0.5
   m_afterSwap: 1
-  m_rangeOfRay: 30
   m_target: {fileID: 0}
 --- !u!4 &1466929612
 Transform:
@@ -1054,6 +1055,7 @@ MonoBehaviour:
   m_prefab: {fileID: 5475761454398097029, guid: 9a756c2ed41ecc9488ec4ee141d3df79, type: 3}
   m_poolCount: 10
   m_forcePoolCount: 1
+  m_isObject: 1
 --- !u!1001 &8157215257222815294
 PrefabInstance:
   m_ObjectHideFlags: 0

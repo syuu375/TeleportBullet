@@ -817,7 +817,7 @@ MonoBehaviour:
     origin: {x: 0, y: 0, z: 0}
     direction: {x: 0, y: 0, z: 0}
     maxDistance: 100
-    viewingAngle: 20
+    viewingAngle: 30
   m_coolTime: 5
   m_preparatory: 0.5
   m_afterSwap: 1

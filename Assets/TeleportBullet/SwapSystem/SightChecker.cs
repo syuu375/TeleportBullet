@@ -14,11 +14,11 @@ public class SightChecker
 {
     public SightChecker(bool isVisible)
     {
-        m_isVisible = isVisible;
+        m_rayCollider = new(isVisible);
     }
 
-    private bool m_isVisible;   // Display gizmos in the Unity Editor.
-    private RayCollider m_rayCollider = new(true);
+    //private bool m_isVisible;   // Display gizmos in the Unity Editor.
+    private RayCollider m_rayCollider;
     private List<Transform> m_objects = new();
 
     /// <summary>
@@ -34,26 +34,12 @@ public class SightChecker
             maxDistance = sightData.maxDistance
         };
 
-        if (m_isVisible)
-        {
-            //float distanceZ = Mathf.Cos(sightData.viewingAngle);
-            float distanceXY = Mathf.Sin(sightData.viewingAngle);
-            Vector3 angleRight  = new Vector3( distanceXY, 0, 0);
-            Vector3 angleLeft   = new Vector3(-distanceXY, 0, 0);
-            Vector3 angleUp     = new Vector3(0,  distanceXY, 0);
-            Vector3 angleDown   = new Vector3(0, -distanceXY, 0);
-
-            Debug.DrawRay(sightData.origin, (sightData.direction + angleRight).normalized * sightData.maxDistance, Color.red, 2.0f); // Right
-            Debug.DrawRay(sightData.origin, (sightData.direction + angleLeft ).normalized * sightData.maxDistance, Color.red, 2.0f); // Left
-            Debug.DrawRay(sightData.origin, (sightData.direction + angleUp   ).normalized * sightData.maxDistance, Color.red, 2.0f); // Up
-            Debug.DrawRay(sightData.origin, (sightData.direction + angleDown ).normalized * sightData.maxDistance, Color.red, 2.0f); // Down
-        }
 
         obj = m_rayCollider.EmitCollider(rayData)?.gameObject.transform;
         if (obj != null) return obj;
 
         float nearDistance = sightData.maxDistance;
-        //Debug.Log($"origin: {sightData.origin}, direction: {sightData.direction}, maxDistance: {sightData.maxDistance}, viewingAngle: {sightData.viewingAngle}");
+
         for (int i = 0; i < m_objects.Count; i++)
         {
             if (!IsVisible(sightData, m_objects[i].position)) continue;

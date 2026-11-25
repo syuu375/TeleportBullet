@@ -40,7 +40,7 @@ public class MyAnimator : MonoBehaviour
 
     public void SetTrigger(int clipsIndex)
     {
-        Debug.Log("SetTrigger");
+        //Debug.Log("SetTrigger");
         m_animClips[clipsIndex].isStop = false;
         m_animClips[clipsIndex].timer = 0; ;
     }
@@ -55,7 +55,7 @@ public class MyAnimator : MonoBehaviour
         var animClip = m_animClips[clipIndex];
         if (m_animClips[clipIndex].isStop) return;
 
-        Debug.Log($"[PA]timer: {animClip.timer}");
+        //Debug.Log($"[PA]timer: {animClip.timer}");
         animClip.image.sprite = animClip.clip.Sprites[Mathf.Abs(animClip.timer)];
 
         if (animClip.timer <= -(animClip.clip.SpritesCount + 1) || (animClip.clip.SpritesCount - 1) <= animClip.timer)

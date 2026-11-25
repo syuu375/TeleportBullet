@@ -992,7 +992,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Test_Spawner
   m_objPool: {fileID: 735000980}
-  m_spawnPosition: {x: -1.5, y: 1.5, z: 0}
+  m_spawnPosition: {x: 0, y: 1.5, z: 0}
 --- !u!4 &1853389791
 Transform:
   m_ObjectHideFlags: 0

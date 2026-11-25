@@ -10,8 +10,11 @@ public class Test_Spawner : MonoBehaviour
 
     void Start()
     {
-        //SetRandomPos();
-        SpawnEnemy(m_spawnPosition, m_objPool, Enum_EnemyType.Prov01);
+        for (int i = 0; i < 2; i++)
+        {
+            SetRandomPos();
+            SpawnEnemy(m_spawnPosition, m_objPool, Enum_EnemyType.Prov01);
+        }
     }
 
     /// <summary>

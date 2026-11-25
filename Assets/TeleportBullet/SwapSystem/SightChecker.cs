@@ -22,7 +22,7 @@ public class SightChecker
     private List<Transform> m_objects = new();
 
     /// <summary>
-    ///（オブジェクトの中心が）設定された視野角内 且つ 視点の中心に最も近いオブジェクト、又はRayに当たったオブジェクトに照準を合わせます。※ Rayが優先
+    ///（オブジェクトの中心が）設定された視野角内 且つ 注視点に最も近いオブジェクト、又はRayに当たったオブジェクトに照準を合わせます。※ Rayが優先
     /// </summary>
     public Transform AutoAim(SightData sightData)
     {
@@ -45,9 +45,9 @@ public class SightChecker
             if (!IsVisible(sightData, m_objects[i].position)) continue;
 
             float distance = (m_objects[i].position - sightData.origin).magnitude;
-            Debug.Log($"[AA]i: {i}, magnitude: {distance}");
+            //Debug.Log($"[AA]i: {i}, magnitude: {distance}");
 
-            if (nearDistance <= distance) continue;
+            if (nearDistance <= distance) continue; // より注視点に近いオブジェクトを保存
             nearDistance = distance;
             obj = m_objects[i];
         }

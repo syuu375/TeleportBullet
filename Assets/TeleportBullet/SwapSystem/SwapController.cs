@@ -85,15 +85,15 @@ public class SwapController : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[ESS]target: {target.gameObject}");
+        //Debug.Log($"[ESS]target: {target.gameObject}");
         if (m_target == target) m_hasTargetChanged = false;
         else m_hasTargetChanged = true;
 
         m_target = target;
-        DisplayMarker(m_target);
+        SetMarker(m_target);
     }
 
-    private void DisplayMarker(Transform target)
+    private void SetMarker(Transform target)
     {
         if (m_hasTargetChanged)
         {
@@ -105,7 +105,7 @@ public class SwapController : MonoBehaviour
             m_markerAnim.SetTrigger(0); // lock on animation
         }
 
-        
+        m_marker.transform.position = m_camera.WorldToScreenPoint(target.position);
     }
 
     private IEnumerator LightEmissionOfSwap()
@@ -150,7 +150,7 @@ public class SwapController : MonoBehaviour
             //Debug.Log("[OAT]target == null");
             return;
         }
-        Debug.Log($"[OAT]m_target: {m_target.position}");
+        //Debug.Log($"[OAT]m_target: {m_target.position}");
         StartCoroutine(LightEmissionOfSwap());
     }
 }

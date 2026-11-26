@@ -245,6 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefensePart
   status: {fileID: 0}
+  storage: {fileID: 0}
   damageTakenRate: 1
   damageSourceLayers:
     serializedVersion: 2
@@ -1007,6 +1008,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefensePart
   status: {fileID: 0}
+  storage: {fileID: 0}
   damageTakenRate: 1
   damageSourceLayers:
     serializedVersion: 2
